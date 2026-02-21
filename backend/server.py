@@ -347,6 +347,7 @@ class HITLRequestReq(BaseModel):
     tool_input: dict = Field(default_factory=dict)
     context: dict = Field(default_factory=dict)
     project_id: Optional[str] = None
+    session_id: Optional[str] = None
 
 class HITLDecisionReq(BaseModel):
     comment: str = ""
@@ -561,8 +562,8 @@ def create_hitl_event(req: HITLRequestReq, api_key=Depends(verify_api_key_header
     # Always use the validated UUID from the API key; ignore string project_id from SDK
     proj_id = api_key.get("project_id")
     db_execute(
-        "INSERT INTO hl_hitl_events (id,project_id,org_id,tool_name,tool_input,context) VALUES (%s,%s,%s,%s,%s,%s)",
-        [eid, str(proj_id) if proj_id else None,
+        "INSERT INTO hl_hitl_events (id,session_id,project_id,org_id,tool_name,tool_input,context) VALUES (%s,%s,%s,%s,%s,%s,%s)",
+        [eid, req.session_id, str(proj_id) if proj_id else None,
          str(api_key["org_id"]), req.tool_name,
          psycopg2.extras.Json(req.tool_input), psycopg2.extras.Json(req.context)], fetch=False
     )
@@ -635,6 +636,26 @@ def list_events(limit: int = 100, session_id: str = None, event_type: str = None
     return [_fmt_event(r) for r in rows]
 
 
+@api.get("/sessions/{session_id}/events")
+def session_events(session_id: str, user=Depends(get_current_user)):
+    """Get all events for a session in chronological order."""
+    rows = db_execute(
+        "SELECT * FROM hl_events WHERE session_id=%s AND org_id=%s ORDER BY timestamp ASC",
+        [session_id, str(user["org_id"])]
+    )
+    return [_fmt_event(r) for r in rows]
+
+
+@api.get("/sessions/{session_id}/hitl")
+def session_hitl(session_id: str, user=Depends(get_current_user)):
+    """Get all HITL events for a session."""
+    rows = db_execute(
+        "SELECT * FROM hl_hitl_events WHERE session_id=%s AND org_id=%s ORDER BY created_at ASC",
+        [session_id, str(user["org_id"])]
+    )
+    return [_fmt_hitl(r) for r in rows]
+
+
 @api.get("/sessions")
 def list_sessions(limit: int = 50, user=Depends(get_current_user)):
     rows = db_execute(
@@ -671,6 +692,7 @@ def _fmt_hitl(r: dict) -> dict:
         "tool_input": r["tool_input"] or {}, "context": r["context"] or {},
         "status": r["status"], "decision_comment": r.get("decision_comment") or "",
         "project_id": str(r["project_id"]) if r.get("project_id") else None,
+        "session_id": str(r["session_id"]) if r.get("session_id") else None,
         "created_at": r["created_at"].isoformat() if r.get("created_at") else None,
         "decided_at": r["decided_at"].isoformat() if r.get("decided_at") else None,
     }

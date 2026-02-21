@@ -64,7 +64,7 @@ class HumanLayerClient:
                 logger.warning(f"Session send error: {e}")
 
     def create_hitl_event(
-        self, tool_name: str, tool_input: dict, context: dict = None
+        self, tool_name: str, tool_input: dict, context: dict = None, session_id: str = None
     ) -> str:
         """Create a HITL approval request. Returns event_id."""
         payload = {
@@ -72,6 +72,7 @@ class HumanLayerClient:
             "tool_input": tool_input,
             "context": context or {},
             "project_id": self._config.project_id,
+            "session_id": session_id,
         }
         resp = self._http.post("/api/hitl/request", json=payload)
         if not resp.is_success:

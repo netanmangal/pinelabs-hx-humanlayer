@@ -4,6 +4,7 @@ import logging
 from typing import List, Optional
 
 from .exceptions import HITLRejectedError, HITLTimeoutError
+from .session import get_current_session
 
 logger = logging.getLogger("humanlayer.hitl")
 
@@ -51,8 +52,11 @@ def request_approval(
     print(f"[HumanLayer] Input: {tool_input}")
     print(f"[HumanLayer] Waiting for human decision (timeout: {timeout}s)...\n")
 
+    session = get_current_session()
+    session_id = session.session_id if session else None
+
     try:
-        event_id = _client.create_hitl_event(tool_name, tool_input, context)
+        event_id = _client.create_hitl_event(tool_name, tool_input, context, session_id=session_id)
     except Exception as e:
         logger.warning(f"HITL request failed ({e}) — allowing execution by default")
         return True
