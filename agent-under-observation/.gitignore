@@ -1,0 +1,22 @@
+# Environment variables (never commit real keys)
+.env
+
+# SQLite checkpoint database (runtime state)
+checkpoints.db
+*.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
