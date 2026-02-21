@@ -118,9 +118,16 @@ def run_agent(
             system_prompt=build_system_prompt(),
             checkpointer=checkpointer,
         )
+
+        # Explicitly pass callback handler for full event capture
+        cb_handler = humanlayer.get_callback_handler()
+        run_config = {"configurable": {"thread_id": thread_id}}
+        if cb_handler:
+            run_config["callbacks"] = [cb_handler]
+
         result = agent.invoke(
             {"messages": [HumanMessage(content=query)]},
-            config=config,
+            config=run_config,
         )
 
     if verbose:

@@ -112,22 +112,18 @@ def wrap_tools(tools: list, approval_required: List[str] = None) -> list:
 
 
 def _wrap_one(tool):
-    """Wrap a single tool's _run method with HITL approval."""
-    original_run = tool._run
+    """Wrap a tool's underlying func with HITL approval.
 
-    def hitl_run(*args, **kwargs):
-        # Build a human-readable input dict
-        try:
-            import inspect
-            sig = inspect.signature(original_run)
-            params = list(sig.parameters.keys())
-            tool_input = {}
-            for i, arg in enumerate(args):
-                if i < len(params):
-                    tool_input[params[i]] = arg
-            tool_input.update(kwargs)
-        except Exception:
-            tool_input = {"args": str(args), "kwargs": str(kwargs)}
+    Wraps `tool.func` (not `tool._run`) so LangChain's internal `config`
+    and `run_manager` kwargs never leak into the HITL payload.
+    """
+    original_func = tool.func  # The raw Python function — no config/run_manager
+
+    def hitl_func(*args, **kwargs):
+        # Build clean input dict from only the actual tool parameters
+        tool_input = dict(kwargs) if kwargs else {}
+        if args and not kwargs:
+            tool_input = {"input": str(args[0]) if len(args) == 1 else [str(a) for a in args]}
 
         try:
             request_approval(tool.name, tool_input)
@@ -136,7 +132,7 @@ def _wrap_one(tool):
         except HITLTimeoutError:
             return f"Action '{tool.name}' timed out waiting for human approval."
 
-        return original_run(*args, **kwargs)
+        return original_func(*args, **kwargs)
 
-    tool._run = hitl_run
+    tool.func = hitl_func
     return tool

@@ -511,8 +511,9 @@ def ingest_events(req: IngestEventsReq, api_key=Depends(verify_api_key_header)):
             for evt in req.events:
                 eid = evt.get("event_id") or str(uuid.uuid4())
                 ts = evt.get("timestamp") or datetime.now(timezone.utc).isoformat()
-                # Resolve project_id: from event > request > api_key
-                project_id = evt.get("project_id") or req.project_id or str(api_key.get("project_id") or "")
+                # Always use the UUID from the API key to avoid type errors
+                proj_key = api_key.get("project_id")
+                project_id = str(proj_key) if proj_key else None
                 session_id = evt.get("session_id") or evt.get("data", {}).get("session_id")
                 cur.execute(
                     """INSERT INTO hl_events (id,session_id,project_id,org_id,run_id,event_type,component,timestamp,data)
@@ -536,13 +537,14 @@ def upsert_session(req: SessionUpsertReq, api_key=Depends(verify_api_key_header)
     conn = get_conn()
     try:
         with conn.cursor() as cur:
+            proj_key = api_key.get("project_id")
             cur.execute(
                 """INSERT INTO hl_sessions (id,project_id,org_id,name,status,event_count,start_time,end_time,statistics,metadata)
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
                 ON CONFLICT(id) DO UPDATE SET
                     status=EXCLUDED.status, event_count=EXCLUDED.event_count,
                     end_time=EXCLUDED.end_time, statistics=EXCLUDED.statistics""",
-                [req.session_id, str(api_key.get("project_id") or ""), str(api_key["org_id"]),
+                [req.session_id, str(proj_key) if proj_key else None, str(api_key["org_id"]),
                  req.name, req.status, req.event_count, req.start_time, req.end_time,
                  psycopg2.extras.Json(req.statistics), psycopg2.extras.Json(req.metadata)]
             )
@@ -556,9 +558,11 @@ def upsert_session(req: SessionUpsertReq, api_key=Depends(verify_api_key_header)
 @api.post("/hitl/request")
 def create_hitl_event(req: HITLRequestReq, api_key=Depends(verify_api_key_header)):
     eid = str(uuid.uuid4())
+    # Always use the validated UUID from the API key; ignore string project_id from SDK
+    proj_id = api_key.get("project_id")
     db_execute(
         "INSERT INTO hl_hitl_events (id,project_id,org_id,tool_name,tool_input,context) VALUES (%s,%s,%s,%s,%s,%s)",
-        [eid, req.project_id or str(api_key.get("project_id") or ""),
+        [eid, str(proj_id) if proj_id else None,
          str(api_key["org_id"]), req.tool_name,
          psycopg2.extras.Json(req.tool_input), psycopg2.extras.Json(req.context)], fetch=False
     )
