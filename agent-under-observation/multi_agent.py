@@ -1,16 +1,7 @@
 """
-Multi-capability AI Agent with LangGraph + persistent checkpointing.
+Multi-capability AI Agent with HumanLayer SDK + LangGraph persistent checkpointing.
 
-Capabilities:
-  - Web search (DuckDuckGo)
-  - Cal.com calendar booking
-  - GitHub issue management (netanmangal/HumanLayer)
-  - Ecommerce database queries (Supabase)
-
-Usage:
-  python multi_agent.py                          # Run default test prompt
-  python multi_agent.py "your query here"        # Run custom query
-  python multi_agent.py --thread <id> "query"   # Use specific thread (persisted session)
+SDK auto-instruments all LangChain events and provides HITL approval for sensitive tools.
 """
 
 import os
@@ -23,6 +14,8 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from langchain.agents import create_agent
 from langgraph.checkpoint.sqlite import SqliteSaver
+
+import humanlayer
 
 from calcom_tools import get_calcom_tools
 from github_tools import get_github_tools
@@ -39,92 +32,64 @@ DEFAULT_TEST_PROMPT = (
     "and create a github issue to fix the infra scaling"
 )
 
+# ── HumanLayer SDK Init ────────────────────────────────────────────────────────
+# This 3-liner is all you need — events are automatically captured
+humanlayer.init(
+    api_key=os.environ.get("HUMANLAYER_API_KEY"),
+    project_id=os.environ.get("HUMANLAYER_PROJECT_ID", "agent-under-observation"),
+    api_base_url=os.environ.get("HUMANLAYER_API_BASE_URL", "http://localhost:8001"),
+    debug=os.environ.get("HUMANLAYER_DEBUG", "false").lower() == "true",
+)
+
 
 def build_system_prompt() -> str:
     now_utc = datetime.now(timezone.utc)
-    now_str = now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")
     today_str = now_utc.strftime("%Y-%m-%d")
-
     return f"""You are a helpful IT support AI assistant with access to multiple tools.
 
-Current datetime (UTC): {now_str}
+Current datetime (UTC): {now_utc.strftime("%Y-%m-%d %H:%M:%S UTC")}
 Today's date: {today_str}
 
-TOOLS AVAILABLE:
-1. Cal.com Calendar: Book meetings, check availability, manage bookings
-2. GitHub: Create/manage issues in repository netanmangal/HumanLayer
-3. Ecommerce Database: Query users, products, orders, payments from Supabase
-4. Web Search: Search the internet via DuckDuckGo
+TOOLS: Cal.com calendar, GitHub (netanmangal/HumanLayer), Ecommerce DB, Web Search
 
-CALENDAR BOOKING INSTRUCTIONS:
-- Always call calendar_get_event_types FIRST to get available event type IDs
-- For "30 min meeting", find the event type with lengthInMinutes = 30
-- Call calendar_get_available_slots to find open slots on the requested date
-- When user says "2pm today", that means {today_str}T14:00:00Z (UTC)
-- If the requested time is not available (e.g., already past or not in slots), automatically book
-  the FIRST available slot from the availability results WITHOUT asking for confirmation
-- Use calendar_create_booking with the exact slot start time from availability results
-- Use UTC format for all datetimes: YYYY-MM-DDThh:mm:ssZ
-- Always complete ALL tasks without stopping mid-way to ask for confirmation
+CALENDAR BOOKING:
+- Call calendar_get_event_types FIRST to get event type IDs
+- For 30 min meeting use lengthInMinutes=30
+- Call calendar_get_available_slots for today's availability
+- If requested time is unavailable, automatically book the FIRST available slot
+- Use UTC format: YYYY-MM-DDThh:mm:ssZ
 
-GITHUB INSTRUCTIONS:
-- Default repository is netanmangal/HumanLayer
-- For issues about infrastructure/scaling use labels like ["infrastructure", "enhancement"]
-- Always provide meaningful issue titles and descriptive bodies
+GITHUB: Default repo is netanmangal/HumanLayer.
 
-DATABASE INSTRUCTIONS:
-- Tables available: users, products, categories, orders, order_items, payments, invoices, addresses
-- Use db_execute_query for complex custom queries
-- Always respect read-only operations
-
-Be concise, accurate, and always complete ALL requested tasks."""
+Always complete ALL requested tasks without stopping to ask for confirmation."""
 
 
-def print_agent_steps(messages: list) -> None:
-    """Pretty-print agent thought process and results."""
+def print_steps(messages: list) -> None:
     print("\n" + "=" * 65)
     for msg in messages:
-        msg_type = type(msg).__name__
-
-        if isinstance(msg, HumanMessage):
-            continue  # Skip echoing input
-
-        elif isinstance(msg, AIMessage):
+        if isinstance(msg, AIMessage):
             if msg.tool_calls:
                 for tc in msg.tool_calls:
                     print(f"\n[TOOL CALL] {tc['name']}")
                     args_str = json.dumps(tc["args"], indent=2)
                     if len(args_str) > 300:
                         args_str = args_str[:297] + "..."
-                    print(f"  Args: {args_str}")
+                    print(f"  {args_str}")
             elif msg.content:
-                print(f"\n[AGENT RESPONSE]\n{msg.content}")
-
+                print(f"\n[AGENT]\n{msg.content}")
         elif isinstance(msg, ToolMessage):
-            content = str(msg.content)
-            truncated = content[:400] + "..." if len(content) > 400 else content
-            print(f"\n[TOOL RESULT] {msg.name}:\n  {truncated}")
-
+            content = str(msg.content)[:400]
+            print(f"\n[TOOL RESULT] {msg.name}:\n  {content}")
     print("=" * 65)
 
 
-def run_agent(query: str, thread_id: str = DEFAULT_THREAD, verbose: bool = True) -> str:
-    """
-    Run the agent with a given query and thread ID.
-
-    Args:
-        query: The user query/instruction.
-        thread_id: Session thread ID for persistent memory.
-        verbose: Print step-by-step reasoning.
-
-    Returns:
-        Final agent response string.
-    """
-    llm = ChatOpenAI(
-        model="gpt-4o",
-        api_key=os.environ["OPENAI_API_KEY"],
-        temperature=0,
-    )
+def run_agent(
+    query: str,
+    thread_id: str = DEFAULT_THREAD,
+    verbose: bool = True,
+    approval_required: list = None,
+) -> str:
+    llm = ChatOpenAI(model="gpt-4o", api_key=os.environ["OPENAI_API_KEY"], temperature=0)
 
     tools = (
         get_calcom_tools()
@@ -133,63 +98,62 @@ def run_agent(query: str, thread_id: str = DEFAULT_THREAD, verbose: bool = True)
         + get_search_tools()
     )
 
-    system_prompt = build_system_prompt()
+    # Wrap sensitive tools with HITL approval
+    if approval_required:
+        tools = humanlayer.wrap_tools(tools, approval_required=approval_required)
+
     config = {"configurable": {"thread_id": thread_id}}
 
     if verbose:
         print(f"\n{'='*65}")
-        print(f"  AGENT QUERY")
-        print(f"{'='*65}")
-        print(f"  Thread  : {thread_id}")
-        print(f"  Time    : {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S UTC')}")
-        print(f"  Query   : {query}")
-        print(f"  Tools   : {len(tools)} registered")
-        print(f"  Memory  : {CHECKPOINT_DB}")
+        print(f"  Thread : {thread_id} | Time: {datetime.now(timezone.utc).strftime('%H:%M:%S UTC')}")
+        print(f"  Query  : {query}")
+        print(f"  Tools  : {len(tools)} | HITL: {approval_required or 'none'}")
         print(f"{'='*65}\n")
 
     with SqliteSaver.from_conn_string(CHECKPOINT_DB) as checkpointer:
         agent = create_agent(
             llm,
             tools,
-            system_prompt=system_prompt,
+            system_prompt=build_system_prompt(),
             checkpointer=checkpointer,
         )
-
         result = agent.invoke(
             {"messages": [HumanMessage(content=query)]},
             config=config,
         )
 
     if verbose:
-        print_agent_steps(result["messages"])
+        print_steps(result["messages"])
 
-    final_answer = result["messages"][-1].content
-    return final_answer
+    return result["messages"][-1].content
 
 
 def main():
     args = sys.argv[1:]
     thread_id = DEFAULT_THREAD
     query = DEFAULT_TEST_PROMPT
+    approval_required = None
 
-    # Parse --thread flag
     if "--thread" in args:
         idx = args.index("--thread")
         if idx + 1 < len(args):
             thread_id = args[idx + 1]
             args = args[:idx] + args[idx + 2:]
 
-    # Remaining args form the query
+    if "--hitl" in args:
+        idx = args.index("--hitl")
+        if idx + 1 < len(args):
+            approval_required = args[idx + 1].split(",")
+            args = args[:idx] + args[idx + 2:]
+
     if args:
         query = " ".join(args)
 
-    print(f"\nRunning agent...")
-    answer = run_agent(query, thread_id=thread_id)
-    print(f"\n{'='*65}")
-    print("FINAL ANSWER:")
-    print(f"{'='*65}")
-    print(answer)
-    print(f"{'='*65}\n")
+    answer = run_agent(query, thread_id=thread_id, approval_required=approval_required)
+    print(f"\n{'='*65}\nFINAL ANSWER:\n{'='*65}\n{answer}\n{'='*65}\n")
+
+    humanlayer.flush()
 
 
 if __name__ == "__main__":
