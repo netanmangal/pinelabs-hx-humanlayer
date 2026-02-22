@@ -221,9 +221,8 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
-    const iv = setInterval(fetchData, 8000);
-    return () => clearInterval(iv);
-  }, [fetchData]);
+    // No auto-polling — use the Refresh button
+  }, [token]);
 
   if (loading) return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 300 }}>

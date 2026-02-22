@@ -235,9 +235,9 @@ export default function HITLDashboard() {
       prevCountRef.current = pending;
       setEvents(list);
     } catch { } finally { setLoading(false); }
-  }, [filter, token]);
+  }, [filter, token]);  // stable deps only — no interval
 
-  useEffect(() => { fetchEvents(); const iv = setInterval(fetchEvents, 1500); return () => clearInterval(iv); }, [fetchEvents]);
+  useEffect(() => { fetchEvents(); }, [filter, token]);  // fetch once on mount/filter change, no polling
 
   async function onApprove(id, comment) {
     const r = await fetch(`${API}/hitl/events/${id}/approve`, { method: "POST", headers, body: JSON.stringify({ comment }) });
@@ -266,10 +266,16 @@ export default function HITLDashboard() {
           </div>
           <p style={{ fontSize: 13, color: "#475569" }}>Review agent actions before they execute • see full context, then decide</p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <div style={{ width: 7, height: 7, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 6px #10b981", animation: "pulse 2s infinite" }} />
-          <span style={{ fontSize: 11, color: "#334155", fontFamily: "JetBrains Mono" }}>live · 1.5s</span>
-        </div>
+        <button onClick={fetchEvents}
+          style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 8, padding: "6px 14px", cursor: "pointer", color: "#475569", fontSize: 12, transition: "all 0.2s" }}
+          onMouseEnter={e => { e.currentTarget.style.color = "#94a3b8"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
+          onMouseLeave={e => { e.currentTarget.style.color = "#475569"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+          </svg>
+          Refresh
+        </button>
       </div>
 
       {/* Filters */}
