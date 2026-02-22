@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 
-DEFAULT_API_BASE_URL = "http://localhost:8001"
+DEFAULT_API_BASE_URL = "https://hitl-agent-v1.preview.emergentagent.com"
 DEFAULT_FLUSH_INTERVAL = 5.0
 DEFAULT_BATCH_SIZE = 50
 DEFAULT_MAX_QUEUE_SIZE = 500

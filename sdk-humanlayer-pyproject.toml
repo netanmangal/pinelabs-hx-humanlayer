@@ -1,13 +1,33 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "humanlayer"
+name = "humanlayer-ai"
 version = "0.1.0"
-description = "Zero-code AI agent monitoring with Human-in-the-Loop for LangChain/LangGraph"
+description = "Zero-code AI agent monitoring with Human-in-the-Loop for LangChain, LangGraph, CrewAI, AutoGen, and any agentic framework"
 readme = "README.md"
+license = { text = "MIT" }
 requires-python = ">=3.10"
+authors = [
+    { name = "HumanLayer", email = "hello@humanlayer.dev" }
+]
+keywords = [
+    "ai", "agents", "langchain", "langgraph", "crewai", "autogen",
+    "human-in-the-loop", "hitl", "monitoring", "observability",
+    "llm", "openai", "anthropic"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "langchain-core>=0.1.0",
     "httpx>=0.25.0",
@@ -15,7 +35,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-asyncio"]
+dev = ["pytest", "pytest-asyncio", "twine", "build"]
+
+[project.urls]
+Homepage = "https://github.com/netanmangal/HumanLayer"
+Repository = "https://github.com/netanmangal/HumanLayer"
+"Bug Tracker" = "https://github.com/netanmangal/HumanLayer/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

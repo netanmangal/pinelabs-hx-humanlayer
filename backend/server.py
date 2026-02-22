@@ -682,7 +682,30 @@ def get_stats(user=Depends(get_current_user)):
 
 @api.get("/health")
 def health():
-    return {"status": "ok", "version": "0.1.0", "timestamp": datetime.now(timezone.utc).isoformat()}
+    """Public health endpoint — no authentication required.
+    Suitable for external agent connectivity checks.
+    """
+    try:
+        db_ok = bool(db_one("SELECT 1 as ok"))
+    except Exception:
+        db_ok = False
+    return {
+        "status": "ok" if db_ok else "degraded",
+        "version": "0.1.0",
+        "service": "HumanLayer Backend",
+        "database": "connected" if db_ok else "unavailable",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "endpoints": {
+            "ingest_events": "/api/ingest/events",
+            "ingest_sessions": "/api/ingest/sessions",
+            "hitl_request": "/api/hitl/request",
+            "hitl_decision": "/api/hitl/events/{event_id}/decision",
+        },
+        "sdk_integration": {
+            "install": "pip install humanlayer",
+            "docs": "https://github.com/netanmangal/HumanLayer",
+        }
+    }
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
