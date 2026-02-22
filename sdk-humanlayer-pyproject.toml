@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "humanlayer-ai"
-version = "0.1.0"
+version = "0.2.0"
 description = "Zero-code AI agent monitoring with Human-in-the-Loop for LangChain, LangGraph, CrewAI, AutoGen, and any agentic framework"
 readme = "README.md"
 license = { text = "MIT" }

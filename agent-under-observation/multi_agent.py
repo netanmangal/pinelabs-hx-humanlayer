@@ -15,7 +15,7 @@ from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
 from langchain.agents import create_agent
 from langgraph.checkpoint.sqlite import SqliteSaver
 
-import humanlayer
+import humanlayer.ai as humanlayer
 
 from calcom_tools import get_calcom_tools
 from github_tools import get_github_tools

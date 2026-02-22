@@ -328,7 +328,7 @@ export default function LandingPage() {
         <motion.div style={{ textAlign: "center", marginBottom: 70 }} initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
           <p style={{ fontFamily: "JetBrains Mono", fontSize: 11, color: "#6366f1", letterSpacing: 3, marginBottom: 12 }}>// INTEGRATION</p>
           <h2 style={{ fontFamily: "Space Grotesk", fontSize: "clamp(28px,4vw,48px)", fontWeight: 700, color: "#fff", marginBottom: 12 }}>
-            Up and running in <span style={{ color: "#6366f1" }}>30 seconds</span>
+            Up and running in <span style={{ color: "#6366f1" }}>5 minutes</span>
           </h2>
           <p style={{ color: "#475569", fontSize: 15 }}>No wrappers. No refactors. Just init and go.</p>
         </motion.div>
