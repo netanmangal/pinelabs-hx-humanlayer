@@ -343,14 +343,15 @@ pip install humanlayer-ai`,
             },
             {
               n: "02", title: "Initialize",
-              code: `import humanlayer
+              code: `import humanlayer.ai as humanlayer
 
+# Only two required args:
 humanlayer.init(
-    api_key="adr_...",
-    project_id="my-agent",
+    api_key="adr_...",     # required
+    project_id="my-agent", # required
 )
 
-# All LangChain events
+# All LangChain/LangGraph events
 # captured automatically.`,
             },
             {

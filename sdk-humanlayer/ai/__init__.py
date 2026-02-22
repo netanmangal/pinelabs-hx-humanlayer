@@ -16,7 +16,7 @@ import atexit
 import logging
 from typing import Optional, List
 
-from humanlayer.ai.config import HumanLayerConfig
+from humanlayer.ai.config import HumanLayerConfig, DEFAULT_API_BASE_URL
 from humanlayer.ai.client import HumanLayerClient
 from humanlayer.ai.callback_handler import HumanLayerCallbackHandler
 from humanlayer.ai.session import Session, get_current_session, set_current_session
@@ -26,7 +26,7 @@ from humanlayer.ai.exceptions import (
 )
 from humanlayer.ai.hitl import wrap_tools, request_approval, _set_client as _set_hitl_client
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 __all__ = [
     "init", "shutdown", "flush", "wrap_tools", "request_approval",
     "get_callback_handler", "is_initialized",
@@ -46,9 +46,10 @@ _initialized = False
 
 
 def init(
-    api_key: str = None,
-    project_id: str = None,
-    api_base_url: str = None,
+    api_key: str,
+    project_id: str,
+    *,
+    api_base_url: str = DEFAULT_API_BASE_URL,
     debug: bool = False,
     auto_instrument: bool = True,
     session_name: str = None,
@@ -56,17 +57,26 @@ def init(
     """
     Initialize HumanLayer SDK.
 
-    Args:
-        api_key: Your HumanLayer API key (adr_...). Reads HUMANLAYER_API_KEY env var if not set.
-        project_id: Project identifier. Reads HUMANLAYER_PROJECT_ID env var if not set.
-        api_base_url: Backend URL. Defaults to https://hitl-agent-v1.preview.emergentagent.com
-        debug: Enable debug logging.
-        auto_instrument: Automatically patch LangChain to capture all events.
-        session_name: Custom name for the default session.
+    Required args:
+        api_key:    Your HumanLayer API key (adr_...). Get one from the dashboard.
+        project_id: Project identifier string (e.g. "my-agent").
+
+    Optional args:
+        api_base_url:    Backend URL. Default: https://hitl-agent-v1.preview.emergentagent.com
+                         Override with HUMANLAYER_API_BASE_URL env var (e.g. http://localhost:8001
+                         when running locally — Kubernetes blocks ingress calls from the same pod).
+        debug:           Enable debug logging. Default: False.
+        auto_instrument: Auto-patch LangChain Runnable.invoke. Default: True.
+        session_name:    Custom session name. Default: auto-generated from project_id.
 
     Example:
-        import humanlayer.ai
-        humanlayer.ai.init(api_key="adr_...", project_id="my-agent")
+        import humanlayer.ai as humanlayer
+
+        humanlayer.init(
+            api_key="adr_...",
+            project_id="my-agent",
+        )
+        tools = humanlayer.wrap_tools(tools, approval_required=["book_meeting"])
     """
     global _client, _config, _callback_handler, _default_session, _initialized
 

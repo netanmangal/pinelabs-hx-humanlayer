@@ -25,12 +25,15 @@ class HumanLayerConfig:
     @classmethod
     def from_env(
         cls,
-        api_key: str = None,
-        project_id: str = None,
+        api_key: str,
+        project_id: str,
         api_base_url: str = None,
         debug: bool = False,
         **kwargs,
     ) -> "HumanLayerConfig":
+        """Build config from explicit args + env var fallbacks.
+        Only api_key and project_id are required.
+        """
         return cls(
             api_key=api_key or os.environ.get("HUMANLAYER_API_KEY"),
             project_id=project_id or os.environ.get("HUMANLAYER_PROJECT_ID"),

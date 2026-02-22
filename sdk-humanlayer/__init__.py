@@ -2,8 +2,8 @@
 HumanLayer SDK namespace package.
 
 New import style (recommended):
-    import humanlayer.ai
-    humanlayer.ai.init(api_key="adr_...", project_id="my-agent")
+    import humanlayer.ai as humanlayer
+    humanlayer.init(api_key="adr_...", project_id="my-agent")
 
 Or:
     from humanlayer import ai
@@ -12,6 +12,9 @@ Or:
 Backward-compatible style (still works):
     import humanlayer
     humanlayer.init(api_key="adr_...", project_id="my-agent")
+
+Only api_key and project_id are required. All other params are optional.
+Default backend: https://hitl-agent-v1.preview.emergentagent.com
 """
 
 # Re-export everything from humanlayer.ai for backward compatibility
