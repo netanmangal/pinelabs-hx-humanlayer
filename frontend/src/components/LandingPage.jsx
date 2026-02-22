@@ -261,7 +261,7 @@ export default function LandingPage() {
               </span>
             </h1>
             <p style={{ fontSize: 17, color: "#64748b", lineHeight: 1.7, marginBottom: 36, maxWidth: 420 }}>
-              Monitor every AI agent decision. Add human approval gates in seconds.
+              Adding human judgment to autonomous AI workflows — without rewriting your agents.
               Works with any agentic framework — LangChain, LangGraph, CrewAI, AutoGen, and more.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>

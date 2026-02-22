@@ -78,7 +78,7 @@ export default function AuthPage({ mode }) {
               {isLogin ? "Welcome back" : "Create your account"}
             </h1>
             <p style={{ fontSize: 14, color: "#64748b" }}>
-              {isLogin ? "Sign in to your HumanLayer dashboard" : "Start monitoring your AI agents in minutes"}
+              {isLogin ? "Sign in to your HumanLayer dashboard" : "Adding human judgment to your AI agents — without rewriting them"}
             </p>
           </div>
 

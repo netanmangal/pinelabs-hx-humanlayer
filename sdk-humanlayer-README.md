@@ -1,6 +1,6 @@
 # HumanLayer
 
-> Zero-code AI agent monitoring with Human-in-the-Loop (HITL) for any agentic framework.
+> Adding human judgment to autonomous AI workflows — without rewriting your agents.
 
 [![PyPI version](https://badge.fury.io/py/humanlayer.svg)](https://badge.fury.io/py/humanlayer)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
