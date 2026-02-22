@@ -702,7 +702,7 @@ def health():
             "hitl_decision": "/api/hitl/events/{event_id}/decision",
         },
         "sdk_integration": {
-            "install": "pip install humanlayer",
+            "install": "pip install humanlayer-ai",
             "docs": "https://github.com/netanmangal/HumanLayer",
         }
     }

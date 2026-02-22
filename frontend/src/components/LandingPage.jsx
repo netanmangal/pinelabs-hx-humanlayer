@@ -246,12 +246,12 @@ export default function LandingPage() {
         {/* Radial gradient spotlight */}
         <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse 80% 60% at 40% 50%, rgba(99,102,241,0.08), transparent 70%)", pointerEvents: "none" }} />
 
-        <div style={{ position: "relative", zIndex: 2, maxWidth: 1200, margin: "0 auto", padding: "120px 40px 80px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 60, alignItems: "center", width: "100%" }}>
+        <div style={{ position: "relative", zIndex: 2, maxWidth: 1200, margin: "0 auto", padding: "120px 24px 80px", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 60, alignItems: "center", width: "100%" }}>
           {/* Left */}
           <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "5px 14px", borderRadius: 20, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)", marginBottom: 24 }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b981", animation: "pulse 2s infinite" }} />
-              <span style={{ fontSize: 12, color: "#818cf8", fontFamily: "JetBrains Mono" }}>Open source · LangChain + LangGraph SDK</span>
+              <span style={{ fontSize: 12, color: "#818cf8", fontFamily: "JetBrains Mono" }}>Open source · Works with any agentic framework</span>
             </div>
             <h1 style={{ fontFamily: "Space Grotesk", fontSize: "clamp(38px,5vw,64px)", fontWeight: 800, lineHeight: 1.05, marginBottom: 20, letterSpacing: "-2px" }}>
               <span style={{ color: "#fff" }}>One line.</span>
@@ -262,7 +262,7 @@ export default function LandingPage() {
             </h1>
             <p style={{ fontSize: 17, color: "#64748b", lineHeight: 1.7, marginBottom: 36, maxWidth: 420 }}>
               Monitor every AI agent decision. Add human approval gates in seconds.
-              Built for LangChain and LangGraph teams.
+              Works with any agentic framework — LangChain, LangGraph, CrewAI, AutoGen, and more.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
               <Link to="/signup" data-testid="hero-cta-btn"
@@ -283,8 +283,8 @@ export default function LandingPage() {
             {/* Install command */}
             <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 18px", borderRadius: 8, background: "#0a0a12", border: "1px solid rgba(255,255,255,0.07)" }}>
               <span style={{ color: "#334155", fontFamily: "JetBrains Mono", fontSize: 13 }}>$</span>
-              <span style={{ color: "#10b981", fontFamily: "JetBrains Mono", fontSize: 13 }}>pip install humanlayer</span>
-              <button data-testid="copy-install-btn" onClick={() => { navigator.clipboard.writeText("pip install humanlayer"); toast.success("Copied!"); }}
+              <span style={{ color: "#10b981", fontFamily: "JetBrains Mono", fontSize: 13 }}>pip install humanlayer-ai</span>
+              <button data-testid="copy-install-btn" onClick={() => { navigator.clipboard.writeText("pip install humanlayer-ai"); toast.success("Copied!"); }}
                 style={{ background: "none", border: "none", cursor: "pointer", color: "#334155", padding: 0, marginLeft: 4, transition: "color 0.2s" }}
                 onMouseEnter={e=>e.currentTarget.style.color="#64748b"} onMouseLeave={e=>e.currentTarget.style.color="#334155"}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -338,7 +338,7 @@ export default function LandingPage() {
             {
               n: "01", title: "Install",
               code: `# Install the SDK
-pip install humanlayer`,
+pip install humanlayer-ai`,
               lang: "bash",
             },
             {

@@ -9,7 +9,7 @@
 ## Install
 
 ```bash
-pip install humanlayer
+pip install humanlayer-ai
 ```
 
 ## Quick Start — 3 lines

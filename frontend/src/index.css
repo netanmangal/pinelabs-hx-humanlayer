@@ -1,0 +1,91 @@
+/* ── Global Responsive Styles ── */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: #02040a;
+  color: #f8fafc;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* CSS Variables */
+:root {
+  --bg: #02040a;
+  --bg-paper: #09090b;
+  --bg-card: #0e0e18;
+  --bg-subtle: #18181b;
+  --fg: #f8fafc;
+  --fg-muted: #94a3b8;
+  --fg-subtle: #475569;
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --accent: #0ea5e9;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #f43f5e;
+  --border: rgba(255,255,255,0.08);
+  --border-active: rgba(99,102,241,0.5);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Space Grotesk', sans-serif;
+  color: #f8fafc;
+}
+
+code, pre, .font-mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+
+a { text-decoration: none; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: #02040a; }
+::-webkit-scrollbar-thumb { background: #1e2030; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #2d3048; }
+
+/* Selection */
+::selection { background: rgba(99,102,241,0.3); color: #f8fafc; }
+
+/* Global input reset — ensures consistent dark styling on all browsers */
+input, textarea, select {
+  background: #12121e !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  border-radius: 8px !important;
+  color: #f8fafc !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 14px !important;
+  padding: 10px 14px !important;
+  width: 100%;
+  outline: none !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: rgba(99,102,241,0.55) !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
+}
+
+input::placeholder, textarea::placeholder { color: rgba(148,163,184,0.5) !important; }
+
+select option { background: #12121e; color: #f8fafc; }
+
+/* Status badges */
+.badge-pending  { background: rgba(245,158,11,0.15); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+.badge-approved { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.25); border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+.badge-rejected { background: rgba(244,63,94,0.1); color: #f43f5e; border: 1px solid rgba(244,63,94,0.22); border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+.badge-active   { background: rgba(14,165,233,0.12); color: #0ea5e9; border: 1px solid rgba(14,165,233,0.25); border-radius: 10px; padding: 2px 8px; font-size: 11px; font-weight: 600; }
+
+/* Responsive utilities */
+.page-pad { padding: 20px 16px; }
+@media (min-width: 640px) { .page-pad { padding: 28px 28px; } }
+@media (min-width: 1024px) { .page-pad { padding: 32px 36px; } }
+
+.no-underline { text-decoration: none; }
