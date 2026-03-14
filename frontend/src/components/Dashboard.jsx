@@ -203,6 +203,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState({ sessions: 0, events: 0, hitl_pending: 0, hitl_total: 0 });
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [agentRunning, setAgentRunning] = useState(false);
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -224,6 +225,31 @@ export default function Dashboard() {
     // No auto-polling — use the Refresh button
   }, [token]);
 
+  const runAgent = async () => {
+    if (agentRunning) return;
+    setAgentRunning(true);
+    try {
+      const res = await fetch(`${API}/agent/invoke`, {
+        method: "POST",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || `HTTP ${res.status}`);
+      }
+      const data = await res.json();
+      toast.success(`🚀 Agent started — session: ${data.session_name}`);
+      toast.info("Check the HITL tab to approve createOrder and cancelOrder actions", { duration: 6000 });
+      // Refresh after a short delay to show the new session
+      setTimeout(fetchData, 3000);
+    } catch (err) {
+      toast.error(`Failed to start agent: ${err.message}`);
+    } finally {
+      setAgentRunning(false);
+    }
+  };
+
   if (loading) return (
     <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 300 }}>
       <div style={{ width: 24, height: 24, borderRadius: "50%", border: "2px solid #6366f1", borderTopColor: "transparent", animation: "spin 0.8s linear infinite" }} />
@@ -241,16 +267,34 @@ export default function Dashboard() {
           <h1 style={{ fontFamily: "Space Grotesk", fontSize: 22, fontWeight: 700, color: "#fff", marginBottom: 4 }}>Overview</h1>
           <p style={{ fontSize: 13, color: "#475569" }}>Real-time agent activity • click any session to expand steps</p>
         </div>
-        <button data-testid="refresh-btn" onClick={fetchData}
-          style={{ padding: "7px 14px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", background: "transparent", color: "#475569", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}
-          onMouseEnter={e => { e.currentTarget.style.color = "#94a3b8"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
-          onMouseLeave={e => { e.currentTarget.style.color = "#475569"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
-            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-          </svg>
-          Refresh
-        </button>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          {/* Run PineLabs Commerce Agent */}
+          <button onClick={runAgent} disabled={agentRunning}
+            style={{ padding: "8px 16px", borderRadius: 8, border: "none", background: agentRunning ? "rgba(99,102,241,0.4)" : "linear-gradient(135deg,#6366f1,#818cf8)", color: "#fff", cursor: agentRunning ? "not-allowed" : "pointer", fontSize: 12, fontWeight: 600, display: "flex", alignItems: "center", gap: 7, transition: "all 0.2s", boxShadow: agentRunning ? "none" : "0 2px 12px rgba(99,102,241,0.35)" }}
+            title="Runs the PineLabs commerce agent: create order → verify → cancel">
+            {agentRunning ? (
+              <>
+                <div style={{ width: 12, height: 12, borderRadius: "50%", border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", animation: "spin 0.8s linear infinite" }} />
+                Starting…
+              </>
+            ) : (
+              <>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                Run Commerce Agent
+              </>
+            )}
+          </button>
+          <button data-testid="refresh-btn" onClick={fetchData}
+            style={{ padding: "7px 14px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", background: "transparent", color: "#475569", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 6, transition: "all 0.2s" }}
+            onMouseEnter={e => { e.currentTarget.style.color = "#94a3b8"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
+            onMouseLeave={e => { e.currentTarget.style.color = "#475569"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
+            Refresh
+          </button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -276,7 +320,11 @@ export default function Dashboard() {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </div>
             <p style={{ fontSize: 14, fontWeight: 500, color: "#fff", marginBottom: 6 }}>No sessions yet</p>
-            <p style={{ fontSize: 12, color: "#334155" }}>Run your agent with HumanLayer SDK to see activity here</p>
+            <p style={{ fontSize: 12, color: "#334155", marginBottom: 16 }}>Click <strong style={{ color: "#6366f1" }}>Run Commerce Agent</strong> above to launch the PineLabs demo agent</p>
+            <button onClick={runAgent} disabled={agentRunning}
+              style={{ padding: "8px 20px", borderRadius: 8, border: "none", background: "linear-gradient(135deg,#6366f1,#818cf8)", color: "#fff", cursor: "pointer", fontSize: 13, fontWeight: 600 }}>
+              🚀 Run Commerce Agent
+            </button>
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>

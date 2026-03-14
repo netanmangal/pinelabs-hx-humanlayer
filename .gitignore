@@ -1,0 +1,49 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+
+# Build outputs
+dist/
+build/
+*.js.map
+*.d.ts.map
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+.eggs/
+*.egg
+
+# Env files — keep .env.example, ignore real .env
+.env
+!.env.example
+
+# SQLite / DB
+*.db
+*.sqlite
+*.sqlite3
+
+# Misc
+.DS_Store
+*.log
+.idea/
+.vscode/
+*.swp
+
+# Python cache & build artifacts
+__pycache__/
+*.pyc
+*.egg-info/
+dist/*.whl
+dist/*.tar.gz
+
+# Backend secrets
+backend/.env
+agent_under_observation/.env

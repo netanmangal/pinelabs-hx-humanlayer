@@ -1,0 +1,19 @@
+{
+  "name": "agent-under-observation-js",
+  "version": "1.0.0",
+  "description": "PineLabs commerce agent with HumanLayer EU AI Act compliance",
+  "type": "module",
+  "main": "src/agent.js",
+  "scripts": {
+    "start": "node src/agent.js",
+    "dev": "node --env-file=.env src/agent.js"
+  },
+  "dependencies": {
+    "@langchain/aws": "^0.1.0",
+    "@langchain/core": "^0.3.0",
+    "@langchain/langgraph": "^0.2.0",
+    "@plural_pinelabs/agent-toolkit": "^0.1.5",
+    "dotenv": "^16.0.0",
+    "humanlayer-ai": "file:../sdk-js"
+  }
+}

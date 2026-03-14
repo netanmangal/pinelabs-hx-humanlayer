@@ -4,6 +4,7 @@ import uuid
 import hashlib
 import secrets
 import logging
+import subprocess
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import List, Optional, Any
@@ -523,6 +524,13 @@ def ingest_events(req: IngestEventsReq, api_key=Depends(verify_api_key_header)):
                      evt.get("run_id"), evt.get("event_type"), evt.get("component"),
                      ts, psycopg2.extras.Json(evt.get("data", {}))]
                 )
+            # Update event_count on sessions that received events (inside same cursor scope)
+            session_ids = list({evt.get("session_id") for evt in req.events if evt.get("session_id")})
+            for sid in session_ids:
+                cur.execute(
+                    "UPDATE hl_sessions SET event_count = (SELECT COUNT(*) FROM hl_events WHERE session_id=%s) WHERE id=%s",
+                    [sid, sid]
+                )
         conn.commit()
         return {"accepted": len(req.events)}
     except Exception as e:
@@ -677,6 +685,60 @@ def get_stats(user=Depends(get_current_user)):
         "events": events_total["c"] if events_total else 0,
         "hitl_pending": hitl_pending["c"] if hitl_pending else 0,
         "hitl_total": hitl_total["c"] if hitl_total else 0,
+    }
+
+
+class AgentInvokeRequest(BaseModel):
+    session_name: Optional[str] = None
+    prompt_override: Optional[str] = None
+
+
+@api.post("/agent/invoke")
+def invoke_agent(body: AgentInvokeRequest, user=Depends(get_current_user)):
+    """Spawn the JS PineLabs commerce agent as a subprocess.
+
+    Returns immediately with a session_name for tracking in the dashboard.
+    The agent will stream events to HumanLayer as it runs.
+    """
+    session_name = body.session_name or f"commerce-{str(uuid.uuid4())[:8]}"
+
+    agent_dir = ROOT_DIR.parent / "agent_under_observation_js"
+    if not agent_dir.exists():
+        raise HTTPException(
+            status_code=500,
+            detail=f"Agent directory not found: {agent_dir}",
+        )
+
+    env = {
+        **os.environ,
+        "AGENT_SESSION_NAME": session_name,
+        # Ensure the agent always reports back to this backend instance
+        "HUMANLAYER_API_BASE_URL": os.environ.get(
+            "HUMANLAYER_API_BASE_URL", "http://localhost:8001"
+        ),
+    }
+
+    try:
+        subprocess.Popen(
+            ["node", "src/agent.js"],
+            cwd=str(agent_dir),
+            env=env,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except FileNotFoundError:
+        raise HTTPException(
+            status_code=500,
+            detail="node executable not found. Ensure Node.js >= 18 is installed.",
+        )
+
+    logger.info(f"Agent spawned — session: {session_name}, user: {user['email']}")
+    return {
+        "status": "started",
+        "session_name": session_name,
+        "message": "Agent is running. Monitor events in the dashboard.",
+        "dashboard_url": "/dashboard",
+        "hitl_url": "/hitl",
     }
 
 
