@@ -220,7 +220,7 @@ export default function LandingPage() {
           <span style={{ fontSize: 10, padding: "2px 7px", borderRadius: 4, background: "rgba(99,102,241,0.15)", color: "#818cf8", border: "1px solid rgba(99,102,241,0.3)", fontFamily: "JetBrains Mono" }}>v0.1</span>
         </div>
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-          <a href="https://github.com/netanmangal/HumanLayer" target="_blank" rel="noreferrer"
+          <a href="https://github.com/netanmangal/pinelabs-hx-humanlayer" target="_blank" rel="noreferrer"
             style={{ color: "#64748b", fontSize: 13, textDecoration: "none", transition: "color 0.2s" }}
             onMouseEnter={e=>e.target.style.color="#94a3b8"} onMouseLeave={e=>e.target.style.color="#64748b"}>
             GitHub
@@ -251,7 +251,7 @@ export default function LandingPage() {
           <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "5px 14px", borderRadius: 20, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.25)", marginBottom: 24 }}>
               <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#10b981", boxShadow: "0 0 8px #10b981", animation: "pulse 2s infinite" }} />
-              <span style={{ fontSize: 12, color: "#818cf8", fontFamily: "JetBrains Mono" }}>Open source · Works with any agentic framework</span>
+              <span style={{ fontSize: 12, color: "#818cf8", fontFamily: "JetBrains Mono" }}>Open source · Built for PineLabs Agent Toolkit</span>
             </div>
             <h1 style={{ fontFamily: "Space Grotesk", fontSize: "clamp(38px,5vw,64px)", fontWeight: 800, lineHeight: 1.05, marginBottom: 20, letterSpacing: "-2px" }}>
               <span style={{ color: "#fff" }}>One line.</span>
@@ -261,8 +261,7 @@ export default function LandingPage() {
               </span>
             </h1>
             <p style={{ fontSize: 17, color: "#64748b", lineHeight: 1.7, marginBottom: 36, maxWidth: 420 }}>
-              Adding human judgment to autonomous AI workflows — without rewriting your agents.
-              Works with any agentic framework — LangChain, LangGraph, CrewAI, AutoGen, and more.
+              SDK that brings traceability, auditability, and human oversight to AI agents operating in commerce systems — built for frameworks supported by the PineLabs Agent Toolkit.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 40 }}>
               <Link to="/signup" data-testid="hero-cta-btn"
@@ -271,7 +270,7 @@ export default function LandingPage() {
                 onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 0 30px rgba(99,102,241,0.4)";e.currentTarget.style.transform="none";}}>
                 Start for free
               </Link>
-              <a href="https://github.com/netanmangal/HumanLayer" target="_blank" rel="noreferrer"
+              <a href="https://github.com/netanmangal/pinelabs-hx-humanlayer" target="_blank" rel="noreferrer"
                 style={{ display: "flex", alignItems: "center", gap: 8, color: "#94a3b8", fontSize: 14, textDecoration: "none", padding: "12px 24px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.1)", transition: "all 0.2s" }}
                 onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,0.25)";e.currentTarget.style.color="#fff";}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(255,255,255,0.1)";e.currentTarget.style.color="#94a3b8";}}>
@@ -283,8 +282,8 @@ export default function LandingPage() {
             {/* Install command */}
             <div style={{ display: "inline-flex", alignItems: "center", gap: 10, padding: "10px 18px", borderRadius: 8, background: "#0a0a12", border: "1px solid rgba(255,255,255,0.07)" }}>
               <span style={{ color: "#334155", fontFamily: "JetBrains Mono", fontSize: 13 }}>$</span>
-              <span style={{ color: "#10b981", fontFamily: "JetBrains Mono", fontSize: 13 }}>pip install humanlayer-ai</span>
-              <button data-testid="copy-install-btn" onClick={() => { navigator.clipboard.writeText("pip install humanlayer-ai"); toast.success("Copied!"); }}
+              <span style={{ color: "#10b981", fontFamily: "JetBrains Mono", fontSize: 13 }}>npm install humanlayer-ai</span>
+              <button data-testid="copy-install-btn" onClick={() => { navigator.clipboard.writeText("npm install humanlayer-ai"); toast.success("Copied!"); }}
                 style={{ background: "none", border: "none", cursor: "pointer", color: "#334155", padding: 0, marginLeft: 4, transition: "color 0.2s" }}
                 onMouseEnter={e=>e.currentTarget.style.color="#64748b"} onMouseLeave={e=>e.currentTarget.style.color="#334155"}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -337,34 +336,36 @@ export default function LandingPage() {
           {[
             {
               n: "01", title: "Install",
-              code: `# Install the SDK
-pip install humanlayer-ai`,
+              code: `# Install the SDK and PineLabs toolkit
+npm install humanlayer-ai
+npm install @plural_pinelabs/agent-toolkit`,
               lang: "bash",
             },
             {
               n: "02", title: "Initialize",
-              code: `import humanlayer.ai as humanlayer
+              code: `import humanlayer from "humanlayer-ai";
 
-# Only two required args:
-humanlayer.init(
-    api_key="adr_...",     # required
-    project_id="my-agent", # required
-)
+// Two required args:
+humanlayer.init({
+  apiKey: "adr_...",           // required
+  projectId: "commerce-agent", // required
+});
 
-# All LangChain/LangGraph events
-# captured automatically.`,
+// All LangChain/LangGraph events
+// captured automatically.`,
+              lang: "javascript",
             },
             {
               n: "03", title: "Add HITL",
-              code: `# Optional: human gates
-tools = humanlayer.wrap_tools(
-    tools,
-    approval_required=[
-        "book_meeting",
-        "create_issue",
-    ]
-)
-# Agent pauses for approval`,
+              code: `// Gate high-stakes commerce actions
+tools = humanlayer.wrapTools(tools, {
+  approvalRequired: [
+    "createOrder",
+    "cancelOrder",
+  ]
+});
+// Agent pauses for human approval`,
+              lang: "javascript",
             },
           ].map((step, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.15 }}>
@@ -379,7 +380,7 @@ tools = humanlayer.wrap_tools(
                     <span style={{ fontFamily: "Space Grotesk", fontSize: 36, fontWeight: 800, color: "rgba(99,102,241,0.15)", lineHeight: 1 }}>{step.n}</span>
                     <h3 style={{ fontFamily: "Space Grotesk", fontSize: 16, fontWeight: 600, color: "#fff" }}>{step.title}</h3>
                   </div>
-                  <Terminal code={step.code} lang={step.lang || "python"} title={step.lang === "bash" ? "terminal" : "agent.py"} />
+                  <Terminal code={step.code} lang={step.lang || "javascript"} title={step.lang === "bash" ? "terminal" : "agent.js"} />
                 </div>
               </TiltCard>
             </motion.div>
@@ -454,7 +455,7 @@ tools = humanlayer.wrap_tools(
       <footer style={{ borderTop: "1px solid rgba(255,255,255,0.04)", padding: "28px 40px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <span style={{ fontSize: 12, color: "#1e293b", fontFamily: "JetBrains Mono" }}>HumanLayer v0.1.0 — Open Source</span>
         <div style={{ display: "flex", gap: 24 }}>
-          <a href="https://github.com/netanmangal/HumanLayer" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#1e293b", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e=>e.target.style.color="#475569"} onMouseLeave={e=>e.target.style.color="#1e293b"}>GitHub</a>
+          <a href="https://github.com/netanmangal/pinelabs-hx-humanlayer" target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#1e293b", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e=>e.target.style.color="#475569"} onMouseLeave={e=>e.target.style.color="#1e293b"}>GitHub</a>
           <Link to="/login" style={{ fontSize: 12, color: "#1e293b", textDecoration: "none", transition: "color 0.2s" }} onMouseEnter={e=>e.target.style.color="#475569"} onMouseLeave={e=>e.target.style.color="#1e293b"}>Dashboard</Link>
         </div>
       </footer>
